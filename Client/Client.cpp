@@ -106,9 +106,14 @@ int FTP_admin::Connect(int sockfd, const std::string &serverIp, std::size_t port
 
 int FTP_admin::Send(int fd, const std::string &passWd)
 {
-    send(fd, passWd.c_str(), passWd.size(), 0);
+    int ret = send(fd, passWd.c_str(), passWd.size(), 0);
+    if(ret < 0)
+    {
+        return -1;
+    }
     //根据命令来执行功能
     Exe_func(passWd);
+    return 0;
 }
 
 std::string FTP_admin::Select(void)
@@ -164,36 +169,108 @@ void FTP_admin::Exe_func(const std::string &order)
 int FTP_admin::InputUsername(const std::string &username)
 {
     passWd = "注册帐号:31";
-    Send(Socket_fd, passWd);
+    int ret = 0;
+    if((ret = Send(Socket_fd, passWd)) < 0)
+    {
+        printf("send InputUsername error!\n");
+        return -1;
+    }
+    /* 发送帐号 */
+    //Send;
+    return 0;
 }
 
 /* 登录 */
 int FTP_admin::Register(void)
 {
     passWd = "登录:32";
-    Send(Socket_fd, passWd);
+    int ret = 0;
+    if((ret = Send(Socket_fd, passWd)) < 0)
+    {
+        printf("send Register error!\n");
+        return -1;
+    }
+    /* 发送帐号密码:检查返回值 */
+    //Send;
+    return 0;
 }
 
 /* 找回密码 */
 int FTP_admin::Find_password(void)
 {
     passWd = "找回密码:33";
-    Send(Socket_fd, passWd);
+    int ret = 0;
+
+    if((ret = Send(Socket_fd, passWd)) < 0)
+    {
+        printf("send Find_password error!\n");
+        return -1;
+    }
+    /* 发送密保:检查返回值 */
+    //Send
+    return 0;
 }
 
 /* 上传 */
 int FTP_admin::upload(const std::string &SerFile, const std::string &LocFile)
 {
+    FILE *file = NULL;
+
+    int data_fd = socket(AF_INET, SOCK_STREAM, 0);
+    assert(data_fd != -1);
+    if(Create_Link(data_fd) < 0)
+    {
+        printf("data link error!\n");
+        return -1;
+    }
+    file = fopen(LocFile.c_str(), "rb");
+    assert(file != NULL);
+
+    /* 发送密码 */
     passWd = "上传:34";
-    Send(Socket_fd, passWd);
+    int ret;
+    if((ret = Send(Socket_fd, passWd)) < 0)
+    {
+        printf("send passWd error!\n");
+        close(data_fd);
+        return -1;
+    }
+
+    int len = 0;
+    char *databuf = new char[FTP_DEFAULT_BUFFER];
+    unsigned long Size = Get_Filelength(LocFile);
+    if(Size < FTP_DEFAULT_BUFFER)
+    {
+        len = Size;
+    }
+    else
+    {
+        len = FTP_DEFAULT_BUFFER;
+    }
+    
+    fseek(file, Size, SEEK_SET);
+    while(!feof(file))
+    {
+        len = fread(databuf, 1, len, file);
+        if(len < 0)
+        {
+            break;
+        }
+
+        if(Send(data_fd, databuf) < 0)
+        {
+            close(data_fd);
+            return -1;
+        }
+    }
+    close(data_fd);
+    fclose(file);
+
 }
 
 /* 下载 */
 int FTP_admin::download(const std::string &SerFile, const std::string &LocFile)
 {
-    passWd = "下载:35";
-    Send(Socket_fd, passWd);
-
     FILE *file = NULL;
     unsigned long DataLen = FTP_DEFAULT_BUFFER;
 
@@ -209,8 +286,20 @@ int FTP_admin::download(const std::string &SerFile, const std::string &LocFile)
     //本地创建文件
     file = Create_Localfile(std::string(FTP_DEFAULT_PATH + LocFile));
     assert(file != NULL);
+    
+    /* 发送密码 */
+    passWd = "下载:35";
+
+    int ret = 0;
+    if((ret = Send(Socket_fd, passWd)) < 0)
+    {
+        printf("send passWd error!\n");
+        close(data_fd);
+        return -1;
+    }
+    
     //获得文件长度
-    int Length = Get_Filelength(SerFile);
+    unsigned long Length = Get_Filelength(SerFile);
     
     char *databuf = new char[FTP_DEFAULT_BUFFER];
     unsigned int len = 0;
@@ -271,7 +360,7 @@ int FTP_admin::Create_Link(int data_fd)
 }
 
 /* 获取文件长度 */
-int FTP_admin::Get_Filelength(const std::string &SerFile)
+unsigned long FTP_admin::Get_Filelength(const std::string &SerFile)
 {
     /* 服务器发送主界面显示的信息，里面包含每个文件的长度 */
 }

@@ -77,7 +77,7 @@ class FTP_admin
         //找回密码
         int Find_password(void);
         //获得文件大小
-        int Get_Filelength(const std::string &SerFile);
+        unsigned long Get_Filelength(const std::string &SerFile);
 
     private:
         //连接服务器
@@ -110,7 +110,8 @@ class FTP_admin
 
 struct Send_Msg
 {
-    int flag;
+    /* json_order  31: */
+    std::string json_order;
     int Length;
     char databuf[FTP_DEFAULT_BUFFER];
 };
