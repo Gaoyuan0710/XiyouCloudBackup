@@ -31,6 +31,7 @@
 #include <pthread.h>     //pthread_create
 #include <map>           //map
 #include <stdio.h>
+#include <memory>
 
 //命令
 #define ERROR_SOCKET -1
@@ -47,10 +48,16 @@ enum FTP_MESG
     FPT_ORDER_UPLOAD
 };
 
+struct pthread_info;
+struct Send_Msg;
+
+
 static int i = 1;
 /* 连接类 */
 class FTP_admin
 {
+    friend void* Put(void *p);  
+    friend void* Get(void *p);
     public:
         FTP_admin(void);
         ~FTP_admin(void);
@@ -94,6 +101,10 @@ class FTP_admin
         FILE* Create_Localfile(const std::string &LocFile);
         //获取数据
         int getData(int fd, char *buf, unsigned int len);
+        //上传调用函数
+        //int Get(pthread_info *pi);
+        //下载调用函数
+        //int Put(pthread_info *pi);
 
     private:
         //命令
@@ -108,12 +119,21 @@ class FTP_admin
 
 };
 
+void* Put(void *p);  
+void* Get(void *p);
+
 struct Send_Msg
 {
     /* json_order  31: */
     std::string json_order;
     int Length;
     char databuf[FTP_DEFAULT_BUFFER];
+};
+
+struct pthread_info
+{
+    std::string SerFile;
+    std::string LocFile;
 };
 
 #endif
