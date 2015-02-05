@@ -42,8 +42,8 @@ int FTP_admin::Login_server(const std::string &ServerIp)
     /* 提取出ip 和 port */
     if(pos > 0)
     {
-        tmpip = ServerIp.substr(0, pos-1);
-        tmpport = ServerIp.substr(pos, ServerIp.size());
+        tmpip = ServerIp.substr(0, pos);
+        tmpport = ServerIp.substr(pos+1, ServerIp.size());
     }
     else
     {
@@ -59,6 +59,7 @@ int FTP_admin::Login_server(const std::string &ServerIp)
         printf("error:connect fault!\n");
         return -1;
     }
+    std::cout << "connect success!" << std::endl;
 
     return 0;
 }
@@ -225,7 +226,10 @@ int FTP_admin::upload(const std::string &SerFile, const std::string &LocFile)
     std::cout << "upload:" << LocFile << std::endl;
     pthread_t pthread_i;
     int ret = pthread_create(&pthread_i, NULL, Put, this);
-    
+    if(ret == 0)
+    {
+        std::cout << "pthread create success!" << std::endl;
+    }
     return 0;
 }
 
@@ -305,7 +309,10 @@ int FTP_admin::download(const std::string &SerFile, const std::string &LocFile)
     std::cout << "download:" << SerFile << std::endl;
     pthread_t pthread_i;
     int ret = pthread_create(&pthread_i, NULL, Get, this);
-
+    if(ret == 0)
+    {
+        std::cout << "pthread create success!" << std::endl;
+    }
 }
 
 /* 下载调用函数 */
