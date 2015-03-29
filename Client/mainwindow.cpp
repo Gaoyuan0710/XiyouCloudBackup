@@ -9,6 +9,9 @@
 #include<QToolBox>
 #include<QToolButton>
 #include<QGroupBox>
+#include<QStandardItemModel>
+#include<QStandardItem>
+#include<QTreeView>
 
 MainWindow::MainWindow(QMainWindow *parent)
     : QMainWindow(parent)
@@ -29,13 +32,15 @@ MainWindow::MainWindow(QMainWindow *parent)
     new QListWidgetItem(tr("设置"),menulist);
 
     QWidget   *firstpage = new QWidget;
+	QWidget   *secondpage= new QWidget;
     QWidget   *threepage = new QWidget;
 
     stack = new QStackedWidget(this);
 
     firstpage->setLayout(UserInfo());
     stack->addWidget(firstpage);
-    stack->addWidget(new QLabel(tr("我的文件")));
+    secondpage = MyFile();
+	stack->addWidget(secondpage);
     threepage->setLayout(MyFriend());
     stack->addWidget(threepage);
     stack->addWidget(new QLabel(tr("上传")));
@@ -109,6 +114,27 @@ QHBoxLayout*  MainWindow::UserInfo()
     mainLayout->addStretch();
 
     return mainLayout;
+}
+
+/*我的文件窗口*/
+QWidget  *MainWindow::MyFile()
+{
+	QWidget *WFile = new QWidget(this);
+	QTreeView* treeview = new QTreeView(WFile);
+	QStandardItemModel  *model = new QStandardItemModel(treeview);
+	model->setHorizontalHeaderLabels(QStringList()<<tr("我的文件"));
+	QStandardItem*  itemDocument = new QStandardItem(tr("文档"));
+	model->appendRow(itemDocument);
+	QStandardItem*  itemPicture = new QStandardItem(tr("图片"));
+	model->appendRow(itemPicture);
+	QStandardItem* itemVideo = new QStandardItem(tr("视频"));
+	model->appendRow(itemVideo);
+	QStandardItem* itemmusic = new QStandardItem(tr("音乐"));
+	model->appendRow(itemmusic);
+	QStandardItem* itemother = new QStandardItem(tr("其他"));
+	model->appendRow(itemother);
+	treeview->setModel(model);
+    return WFile;
 }
 
 QHBoxLayout*  MainWindow::MyFriend()

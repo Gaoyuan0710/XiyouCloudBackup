@@ -1,5 +1,3 @@
-//主界面
-
 #ifndef MIANWINDOW_H
 #define MIANWINDOW_H
 
@@ -23,7 +21,9 @@ class MainWindow : public QMainWindow
         QStackedWidget         *stack;
 
 //函数声明
+    private:
         QHBoxLayout*  UserInfo();
+        QWidget*      MyFile();
         QHBoxLayout*  MyFriend();
 };
 
