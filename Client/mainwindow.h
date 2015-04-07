@@ -7,6 +7,7 @@
 #include <QStackedWidget>
 #include <QHBoxLayout>
 #include <QSplitter>
+#include "filetreeview.h"
 
 class MainWindow : public QMainWindow
 {
@@ -17,14 +18,15 @@ class MainWindow : public QMainWindow
         QSplitter                      *mainsplitter;
     private:
         QLabel                         *Titlelabel;
-        QListWidget                 *menulist;
-        QStackedWidget         *stack;
+        QListWidget                    *menulist;
+        QStackedWidget                 *stack;
+		FileWidget                   *filewidget;
 
 //函数声明
-    private:
-        QHBoxLayout*  UserInfo();
-        QWidget*      MyFile();
-        QHBoxLayout*  MyFriend();
+    public:
+        QHBoxLayout*     UserInfo();
+ //       QHBoxLayout*     MyFile();
+        QHBoxLayout*     MyFriend();
 };
 
 #endif
