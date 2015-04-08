@@ -25,6 +25,11 @@ Monitor::Monitor()
     assert(fd != -1);
 }
 
+Monitor::~Monitor()
+{
+    close(fd);
+}
+
 int 
 Monitor::read_file(std::string &file)
 {
@@ -41,8 +46,9 @@ Monitor::read_file(std::string &file)
 int 
 Monitor::notify_add(std::string &one_list)
 {
-    int wd = inotify_add_watch(fd, one_list.c_str(), IN_MODIFY | IN_DELETE_SELF);
+    int wd = inotify_add_watch(fd, one_list.c_str(), IN_MODIFY | IN_DELETE_SELF | IN_DELETE | IN_CREATE);
     //int ad = inotify_add_watch(fd, one_list.c_str(), IN_ALL_EVENTS);
+    //std::cout << wd << std::endl;
     assert(wd != -1);
     file_list.push_back(one_list);
     watch.insert({one_list, wd});
@@ -84,6 +90,7 @@ Monitor::prompt(void)
         while(i < length)
         {
             struct inotify_event *event = (struct inotify_event*)(buffer + i);
+            //struct inotify_event *event = (struct inotify_event*)&buffer[i];
             std::cout << "event_wd:" << event->wd << std::endl;
             std::cout << "event_mask:" << event->mask << std::endl;
             std::cout << "event_cookie:" << event->cookie << std::endl;
@@ -103,6 +110,19 @@ Monitor::prompt(void)
                     }
 
                 }
+                else if(event->mask & IN_CREATE)
+                {
+                    if(event->mask & IN_ISDIR)
+                    {
+                        std::cout << "the Directory:" << event->name << " is create" << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "the file:" << event->name << " is create" << std::endl;
+                    }   
+                    std::string add_wd(event->name);
+                    //notify_add(add_wd);
+                }
                 else if(event->mask & IN_DELETE)
                 {
                     if(event->mask & IN_ISDIR)
@@ -113,7 +133,8 @@ Monitor::prompt(void)
                     {
                         std::cout << "the file:" << event->name << " is delete" << std::endl;
                     }       
-                    notify_rm(fd, wd);
+                    std::string rm_wd(event->name);
+                    notify_rm(rm_wd);
                 }
             }
             i += event_size + event->len;
