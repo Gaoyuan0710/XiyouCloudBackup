@@ -5,6 +5,7 @@
 #include<QtGui/QWidget>
 #include<QTreeView>
 #include<QStandardItemModel>
+#include<QStandardItem>
 #include<QMenu>
 #include<QAction>
 #include<QLabel>
@@ -20,6 +21,9 @@ class FileWidget : public QWidget
 
 		void CreatMenuAction();
 		void CreatMenu();
+
+		void AddFile(QFileInfo  fileinfo);
+
     private slots:
 	    void MenuRequested(const QPoint &pos);	
         void ActionUpFileDialog();
@@ -29,12 +33,19 @@ class FileWidget : public QWidget
 	private:
 	    QTreeView           *treeview;
 		QStandardItemModel  *model;
+		QStandardItem       *itemDocument;
+		QStandardItem       *itemPicture;
+		QStandardItem       *itemVideo;
+		QStandardItem       *itemmusic;
+		QStandardItem       *itemother;
 
-		QMenu               *folderMenu;
-		QMenu               *fileMenu;
+		QFileInfo           fileinfo; //文件信息
 
-		QAction             *uploadfile;
-		QAction             *downloadfile;
+		QMenu               *folderMenu;//目录菜单
+		QMenu               *fileMenu;//文件菜单
+
+		QAction             *uploadfile;//上传
+		QAction             *downloadfile;//下载
 
 		QFileDialog         *filedialog;
 		QLabel              *savelabel;

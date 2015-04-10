@@ -6,11 +6,15 @@
     > Created Time: 2015年04月04日 星期六 23时47分08秒
  =======================================================*/
 
-#include<QStandardItem>
 #include<QHBoxLayout>
 #include<QString>
 #include<QDialog>
+#include<QFileInfo>
 #include"filetreeview.h"
+
+#include<QByteArray>
+#include<iostream>
+using namespace std;
 
 //文件类型标志
 #define   ROLE_MARK             Qt::UserRole + 1
@@ -32,7 +36,7 @@ FileWidget :: FileWidget(QWidget *parent) : QWidget(parent)
 	model = new QStandardItemModel;
 	model->setHorizontalHeaderLabels(QStringList()<<tr("我的文件"));
 
-	QStandardItem*  itemDocument = new QStandardItem(tr("文档"));
+	itemDocument = new QStandardItem(tr("文档"));
 	itemDocument->setData(MARK_FOLDER,ROLE_MARK);
 	itemDocument->setData(MARK_FOLDER_DOCUMENT,ROLE_MARK_FOLDER);
 	model->appendRow(itemDocument);
@@ -41,22 +45,22 @@ FileWidget :: FileWidget(QWidget *parent) : QWidget(parent)
 	test->setData(MARK_FILE,ROLE_MARK);
 	itemDocument->appendRow(test);
 
-	QStandardItem*  itemPicture = new QStandardItem(tr("图片"));
+	itemPicture = new QStandardItem(tr("图片"));
 	itemPicture->setData(MARK_FOLDER,ROLE_MARK);
 	itemPicture->setData(MARK_FOLDER_PICTURE,ROLE_MARK_FOLDER);
 	model->appendRow(itemPicture);
 
-	QStandardItem* itemVideo = new QStandardItem(tr("视频"));
+	itemVideo = new QStandardItem(tr("视频"));
 	itemVideo->setData(MARK_FOLDER,ROLE_MARK);
 	itemVideo->setData(MARK_FOLDER_VIDEO,ROLE_MARK_FOLDER);
 	model->appendRow(itemVideo);
 
-	QStandardItem* itemmusic = new QStandardItem(tr("音乐"));
+	itemmusic = new QStandardItem(tr("音乐"));
 	itemmusic->setData(MARK_FOLDER,ROLE_MARK);
 	itemmusic->setData(MARK_FOLDER_MUSIC,ROLE_MARK_FOLDER);
 	model->appendRow(itemmusic);
 
-	QStandardItem* itemother = new QStandardItem(tr("其他"));
+	itemother = new QStandardItem(tr("其他"));
 	itemother->setData(MARK_FOLDER,ROLE_MARK);
 	itemother->setData(MARK_FOLDER_OTHER,ROLE_MARK_FOLDER);
 	model->appendRow(itemother);
@@ -109,6 +113,30 @@ void FileWidget::ActionUpFileDialog()
 	filedialog->setDirectory(".");
 	filedialog->setFilter("*");
     filedialog->show();
+
+	if(filedialog->exec() == QFileDialog::Accepted)
+	{
+		QString filename = filedialog->selectedFiles()[0];
+	
+		fileinfo = QFileInfo(filename);
+
+		AddFile(fileinfo);
+
+		QString file_name;
+		file_name = fileinfo.fileName();
+		
+		char*   ch = new char[30];
+		QByteArray ba = filename.toLocal8Bit();
+		ch = ba.data();
+		cout<<ch<<endl;
+	
+	//	string str = filename.toStdString();
+		string str = ba.data();
+		cout<<str<<endl;
+		ba = file_name.toLocal8Bit();
+		str = ba.data();
+		cout<<str<<endl;
+	}
 }
 
 void FileWidget::ActionDownFileDialog()
@@ -137,4 +165,34 @@ void FileWidget::ActionDownFileDialog()
 void FileWidget::LinePathShow(const QString &path)
 {
 	saveline->setText(path);
+}
+
+void FileWidget::AddFile(QFileInfo  fileinfo)
+{
+	QString  file_suffix,file_name;
+	file_suffix = fileinfo.suffix();
+	file_name = fileinfo.fileName();
+    QStandardItem*   file = new QStandardItem(file_name);
+    file->setData(MARK_FILE,ROLE_MARK);
+
+	if(operator==("doc",file_suffix))
+	{
+	    itemDocument->appendRow(file);
+	}
+	else if(operator==("png",file_suffix))
+	{
+		itemPicture->appendRow(file);
+	}
+	else if(operator==("mp4",file_suffix))
+	{
+		itemVideo->appendRow(file);
+	}
+	else if(operator==("mp3",file_suffix))
+	{
+		itemmusic->appendRow(file);
+	}
+	else
+	{
+		itemother->appendRow(file);
+	}
 }
